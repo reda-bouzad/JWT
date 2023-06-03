@@ -2,6 +2,7 @@ package maroc.reda.jwt.controller;
 
 import org.springframework.web.bind.annotation.*;
 
+@CrossOrigin("*")
 @RestController
 @RequestMapping("/api/v1/management")
 public class ManagementController {

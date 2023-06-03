@@ -3,13 +3,13 @@ package maroc.reda.jwt.auth;
 import lombok.RequiredArgsConstructor;
 import maroc.reda.jwt.Security.JwtService;
 import maroc.reda.jwt.dao.UserDao;
-import maroc.reda.jwt.entity.Role;
 import maroc.reda.jwt.entity.User;
-import maroc.reda.jwt.myenums.Roles;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -28,7 +28,10 @@ public class AuthenticationService {
                 .role(request.getRole())
                 .build();
         repository.save(user);
+
+        // Generate the token with the user's role included
         var jwtToken = jwtService.generateToken(user);
+
         return AuthenticationResponse.builder()
                 .token(jwtToken)
                 .build();
@@ -44,8 +47,19 @@ public class AuthenticationService {
         var user = repository.findByEmail(request.getEmail())
                 .orElseThrow();
         var jwtToken = jwtService.generateToken(user);
+        storeTokenInDatabase(user.getUsername(), jwtToken);
+
         return AuthenticationResponse.builder()
                 .token(jwtToken)
                 .build();
+    }
+
+    private void storeTokenInDatabase(String username, String token) {
+        Optional<User> user = repository.findByEmail(username);
+        if (user.isPresent()) {
+            User myUser = user.get();
+            myUser.setToken(token);
+            repository.save(myUser);
+        }
     }
 }

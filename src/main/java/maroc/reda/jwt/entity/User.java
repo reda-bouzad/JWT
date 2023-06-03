@@ -34,6 +34,9 @@ public class User implements UserDetails {
 
     private String password;
 
+    @Column(length = 2048) // Set the desired length for the token column
+    private String token;
+
     @Enumerated(EnumType.STRING)
     private Roles role;
 

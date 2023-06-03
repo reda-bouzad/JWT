@@ -1,16 +1,23 @@
 package maroc.reda.jwt.auth;
 
 import lombok.RequiredArgsConstructor;
+import maroc.reda.jwt.dao.UserDao;
+import maroc.reda.jwt.entity.User;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
+import java.util.Optional;
+
+@CrossOrigin("*")
 @RestController
 @RequestMapping("/api/v1/auth")
+
 @RequiredArgsConstructor
 public class AuthenticationController {
+
+    @Autowired
+    private UserDao userDao;
 
     private final AuthenticationService service;
 
@@ -20,13 +27,22 @@ public class AuthenticationController {
         return ResponseEntity.ok(service.register(request));
     }
 
-    @PostMapping("/authenicate")
+    @PostMapping("/authenticate")
     public ResponseEntity<AuthenticationResponse> authenticate(
             @RequestBody AuthenticationRequest request) {
         return ResponseEntity.ok(service.authenticate(request));
     }
 
+    @GetMapping("/token/{email}")
+    public String getToken(@PathVariable String email) {
 
-
+        Optional<User> user = userDao.findByEmail(email);
+        String myToken = null;
+        if (user.isPresent()) {
+            User myUser = user.get();
+            myToken = myUser.getToken();
+        }
+        return myToken;
+    }
 
 }
